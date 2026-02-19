@@ -16,12 +16,7 @@ k3s (exists)
 
 ## Roadmap
 
-- [ ] **TF foundation** — providers, state, cert-manager, Traefik config
-- [ ] **Observability** — Prometheus, Grafana, Loki via Helm
-- [ ] **Forgejo** — Forgejo deployment with Traefik ingress, built-in container registry
-- [ ] **Woodpecker CI** — Woodpecker server + agents, Forgejo OAuth integration
-
-Each milestone is its own GitHub issue, implemented as a separate PR.
+Track progress in [#8 (Bootstrap platform epic)](https://github.com/ldraney/pal-e-platform/issues/8). Each milestone is its own GitHub issue, implemented as a separate PR.
 
 ## Tech Stack
 
