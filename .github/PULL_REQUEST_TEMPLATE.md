@@ -1,14 +1,29 @@
+Closes #
+
 ## Summary
 <!-- 1-3 bullets: what changed and why -->
 
-## Tech Stack Alignment
-<!-- Does this change align with the platform tech stack in README.md? If it introduces a new tool or deviates, explain why. -->
+## Discovered Scope
+<!-- Work identified during this PR that should become its own issue. "None" is fine. -->
 
-## Terraform Impact
-<!-- Which terraform root(s) are affected? (platform/, openclaw/, etc.) -->
-<!-- Any state changes? (new resources, imports, moves) -->
+## Terraform Changes
+<!-- If no TF changes, write "N/A" and delete the checklist -->
 
-## Test Plan
-<!-- How was this verified? -->
+<details>
+<summary>tofu plan output</summary>
 
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
+```
+paste plan output here
+```
+
+</details>
+
+- [ ] `tofu fmt` passed
+- [ ] `tofu validate` passed
+
+## README Impact
+- [ ] README roadmap updated (or N/A)
+
+## Review Checklist
+- [ ] Review-fix loop passed (clean review, zero issues)
+- [ ] User approved merge

@@ -3,7 +3,6 @@
 *.tfstate.*
 *.tfstate.backup
 .terraform/
-.terraform.lock.hcl
 *.tfplan
 *.tfvars
 !*.tfvars.example
@@ -12,6 +11,11 @@ override.tf
 override.tf.json
 *_override.tf
 *_override.tf.json
+
+# Helm
+*.tgz
+.helm/
+charts/
 
 # Secrets
 *.pem

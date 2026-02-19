@@ -1,0 +1,53 @@
+name: Feature
+description: Propose a new feature or enhancement
+labels: ["feature"]
+body:
+  - type: input
+    id: parent-epic
+    attributes:
+      label: Parent Epic
+      description: "Link to the parent epic (e.g., #8)"
+      placeholder: "#8"
+    validations:
+      required: true
+
+  - type: input
+    id: roadmap-item
+    attributes:
+      label: README Roadmap Item
+      description: "Which roadmap checkbox does this advance?"
+      placeholder: "TF foundation / Observability / Forgejo / Woodpecker CI"
+    validations:
+      required: true
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What
+      description: "What should be built or changed?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: "Why is this needed? What problem does it solve?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: not-in-scope
+    attributes:
+      label: Not In Scope
+      description: "Anything explicitly excluded from this issue?"
+    validations:
+      required: false
+
+  - type: textarea
+    id: discovered-scope
+    attributes:
+      label: Discovered Scope
+      description: "Work identified during implementation that should become its own issue."
+    validations:
+      required: false
