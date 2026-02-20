@@ -17,3 +17,8 @@ output "loki_internal_url" {
   description = "Loki internal cluster URL"
   value       = "http://loki-stack.monitoring:3100"
 }
+
+output "forgejo_url" {
+  description = "Forgejo URL (Tailscale funnel)"
+  value       = "https://forgejo.${var.tailscale_domain}"
+}

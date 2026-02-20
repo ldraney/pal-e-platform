@@ -26,3 +26,21 @@ variable "tailscale_domain" {
   type        = string
   default     = "tail5b443a.ts.net"
 }
+
+variable "forgejo_admin_username" {
+  description = "Forgejo admin username (cannot be 'admin')"
+  type        = string
+  default     = "forgejo_admin"
+}
+
+variable "forgejo_admin_password" {
+  description = "Forgejo admin password"
+  type        = string
+  sensitive   = true
+}
+
+variable "forgejo_admin_email" {
+  description = "Forgejo admin email"
+  type        = string
+  default     = "admin@forgejo.local"
+}
