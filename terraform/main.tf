@@ -273,3 +273,96 @@ resource "kubernetes_ingress_v1" "grafana_funnel" {
 
   depends_on = [helm_release.kube_prometheus_stack, helm_release.tailscale_operator, tailscale_acl.this]
 }
+
+# --- Forgejo Namespace ---
+
+resource "kubernetes_namespace_v1" "forgejo" {
+  metadata {
+    name = "forgejo"
+    labels = {
+      name = "forgejo"
+    }
+  }
+}
+
+# --- Forgejo ---
+
+resource "helm_release" "forgejo" {
+  name      = "forgejo"
+  namespace = kubernetes_namespace_v1.forgejo.metadata[0].name
+  chart     = "oci://code.forgejo.org/forgejo-helm/forgejo"
+  version   = "16.2.0"
+  timeout   = 600
+
+  values = [yamlencode({
+    gitea = {
+      admin = {
+        username     = var.forgejo_admin_username
+        email        = var.forgejo_admin_email
+        passwordMode = "keepUpdated"
+      }
+      config = {
+        server = {
+          DOMAIN     = "forgejo.${var.tailscale_domain}"
+          ROOT_URL   = "https://forgejo.${var.tailscale_domain}/"
+          SSH_DOMAIN = "forgejo.${var.tailscale_domain}"
+        }
+      }
+    }
+
+    persistence = {
+      enabled      = true
+      size         = "10Gi"
+      storageClass = "local-path"
+    }
+
+    service = {
+      http = { type = "ClusterIP", port = 80 }
+      ssh  = { type = "ClusterIP", port = 22 }
+    }
+
+    ingress = { enabled = false }
+
+    resources = {
+      requests = { cpu = "100m", memory = "512Mi" }
+      limits   = { memory = "2Gi" }
+    }
+  })]
+
+  set_sensitive {
+    name  = "gitea.admin.password"
+    value = var.forgejo_admin_password
+    type  = "string"
+  }
+}
+
+# --- Forgejo Tailscale Funnel ---
+
+resource "kubernetes_ingress_v1" "forgejo_funnel" {
+  metadata {
+    name      = "forgejo-funnel"
+    namespace = kubernetes_namespace_v1.forgejo.metadata[0].name
+    annotations = {
+      "tailscale.com/funnel" = "true"
+    }
+  }
+
+  spec {
+    ingress_class_name = "tailscale"
+
+    default_backend {
+      service {
+        name = "forgejo-http"
+        port {
+          number = 80
+        }
+      }
+    }
+
+    tls {
+      hosts = ["forgejo"]
+    }
+  }
+
+  depends_on = [helm_release.forgejo, helm_release.tailscale_operator, tailscale_acl.this]
+}
