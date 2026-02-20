@@ -201,7 +201,7 @@ resource "kubernetes_config_map_v1" "grafana_loki_datasource" {
     })
   }
 
-  depends_on = [helm_release.loki_stack]
+  depends_on = [helm_release.loki_stack, helm_release.kube_prometheus_stack]
 }
 
 # --- Grafana Tailscale Funnel ---
