@@ -22,3 +22,8 @@ output "forgejo_url" {
   description = "Forgejo URL (Tailscale funnel)"
   value       = "https://forgejo.${var.tailscale_domain}"
 }
+
+output "woodpecker_url" {
+  description = "Woodpecker CI URL (Tailscale funnel)"
+  value       = "https://woodpecker.${var.tailscale_domain}"
+}
