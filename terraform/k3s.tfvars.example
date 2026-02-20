@@ -1,3 +1,4 @@
 kubeconfig_path               = "~/.kube/config"
 tailscale_oauth_client_id     = "your-tailscale-oauth-client-id"
 tailscale_oauth_client_secret = "your-tailscale-oauth-client-secret"
+grafana_admin_password        = "your-grafana-admin-password"
