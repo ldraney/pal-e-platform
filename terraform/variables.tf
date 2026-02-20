@@ -7,7 +7,6 @@ variable "kubeconfig_path" {
 variable "tailscale_oauth_client_id" {
   description = "Tailscale OAuth client ID for the operator"
   type        = string
-  sensitive   = true
 }
 
 variable "tailscale_oauth_client_secret" {
