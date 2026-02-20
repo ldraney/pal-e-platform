@@ -62,7 +62,6 @@ resource "helm_release" "kube_prometheus_stack" {
     kubeScheduler         = { enabled = false }
 
     grafana = {
-      adminPassword = var.grafana_admin_password
       persistence = {
         enabled          = true
         size             = "2Gi"
@@ -133,6 +132,12 @@ resource "helm_release" "kube_prometheus_stack" {
       }
     }
   })]
+
+  set_sensitive {
+    name  = "grafana.adminPassword"
+    value = var.grafana_admin_password
+    type  = "string"
+  }
 }
 
 # --- Monitoring: Loki ---
@@ -171,6 +176,32 @@ resource "helm_release" "loki_stack" {
       }
     }
   })]
+}
+
+# --- Grafana Loki Datasource ---
+
+resource "kubernetes_config_map_v1" "grafana_loki_datasource" {
+  metadata {
+    name      = "grafana-loki-datasource"
+    namespace = kubernetes_namespace_v1.monitoring.metadata[0].name
+    labels = {
+      grafana_datasource = "1"
+    }
+  }
+
+  data = {
+    "loki-datasource.yaml" = yamlencode({
+      apiVersion = 1
+      datasources = [{
+        name   = "Loki"
+        type   = "loki"
+        url    = "http://loki-stack:3100"
+        access = "proxy"
+      }]
+    })
+  }
+
+  depends_on = [helm_release.loki_stack]
 }
 
 # --- Grafana Tailscale Funnel ---
