@@ -66,10 +66,20 @@ variable "harbor_admin_password" {
   description = "Harbor admin password"
   type        = string
   sensitive   = true
+
+  validation {
+    condition     = length(var.harbor_admin_password) >= 8
+    error_message = "harbor_admin_password must be at least 8 characters."
+  }
 }
 
 variable "harbor_secret_key" {
   description = "Harbor 16-char encryption key for internal secrets (must be preserved)"
   type        = string
   sensitive   = true
+
+  validation {
+    condition     = length(var.harbor_secret_key) == 16
+    error_message = "harbor_secret_key must be exactly 16 characters."
+  }
 }

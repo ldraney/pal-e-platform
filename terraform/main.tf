@@ -507,8 +507,7 @@ resource "helm_release" "harbor" {
       clusterIP = {
         name = "harbor"
         ports = {
-          httpPort  = 80
-          httpsPort = 443
+          httpPort = 80
         }
       }
       tls = {
