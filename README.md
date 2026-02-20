@@ -8,7 +8,7 @@ Bootstrap repo that deploys the minimum viable self-hosting stack onto an existi
 
 ```
 k3s (exists)
-  → cert-manager + Traefik (TLS + ingress)
+  → Tailscale operator (networking/ingress via funnels)
     → Prometheus + Grafana + Loki (observability)
       → Forgejo (git hosting + container registry)
         → Woodpecker CI (build pipelines)
@@ -24,8 +24,7 @@ Track progress in [#8 (Bootstrap platform epic)](https://github.com/ldraney/pal-
 |-----------|------|---------|
 | IaC | OpenTofu | Declarative infrastructure management |
 | Cluster | k3s | Lightweight Kubernetes (pre-existing) |
-| TLS | cert-manager | Automated certificate lifecycle |
-| Ingress | Traefik | k3s default, IngressRoute CRDs |
+| Ingress + TLS | Tailscale funnels | Zero-config ingress and TLS via tailnet |
 | Metrics | Prometheus + Grafana | Collection and dashboards |
 | Logs | Loki | Lightweight log aggregation |
 | Git hosting | Forgejo | Self-hosted git + built-in OCI registry |
@@ -33,23 +32,24 @@ Track progress in [#8 (Bootstrap platform epic)](https://github.com/ldraney/pal-
 
 ## What Moves to Forgejo
 
-These are explicitly **not in scope** for this repo. Once Forgejo is running, a new repo (hosted on Forgejo) handles:
+These are explicitly **not in scope** for this repo. Once Forgejo is running, [pal-e-services](https://github.com/ldraney/pal-e-services) (hosted on Forgejo) handles:
 
-- Harbor (if needed — Forgejo has a built-in container registry)
+- Service onboarding (image → registry → deploy → monitor)
 - MinIO (S3-compatible object storage)
-- ArgoCD (GitOps app deployments)
-- Application deployments (mcp-gateway-k8s import, pal-e-assets, etc.)
+- ArgoCD (GitOps app deployments, if needed)
+- Application deployments (openclaw import, pal-e-assets, etc.)
 - Production workload management
 
 ## Terraform Layout
 
 ```
 terraform/
-├── main.tf           # Bootstrap resources
-├── providers.tf      # k3s, Helm, kubectl providers
+├── main.tf              # Bootstrap resources
+├── providers.tf         # k3s, Helm providers
 ├── variables.tf
 ├── outputs.tf
-├── k3s.tfvars
+├── k3s.tfvars           # Actual values (gitignored)
+├── k3s.tfvars.example   # Placeholder template (committed)
 └── versions.tf
 ```
 
@@ -62,7 +62,7 @@ Local state (`terraform.tfstate`) for now. Remote backend (S3-compatible on MinI
 ## Architecture Principles
 
 1. **Bootstrap-first.** Get the self-hosting stack running before optimizing anything. Perfect is the enemy of deployed.
-2. **Repos have an end.** This repo's job is done when Forgejo + CI + observability are running. Future work lives in future repos.
+2. **Repos have an end.** This repo's job is done when Forgejo + CI + observability are running. Future work lives in [pal-e-services](https://github.com/ldraney/pal-e-services).
 3. **In-cluster by default.** Every infrastructure need is met by a self-hosted service. Cloud-managed services are opt-in when scale justifies cost.
 4. **Portable across substrates.** Same Helm charts run on k3s or EKS. Environment differences live in .tfvars files, not in code.
 5. **Observable from day one.** Metrics and logs are platform concerns, not afterthoughts.

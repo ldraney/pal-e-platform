@@ -1,13 +1,14 @@
 # pal-e-platform
 
-Bootstrap repo: deploys observability + Forgejo + Woodpecker CI onto existing k3s.
+Bootstrap repo: deploys Tailscale + observability + Forgejo + Woodpecker CI onto existing k3s.
 
 ## Tech Context
 
 - **IaC**: OpenTofu (`tofu` not `terraform`). Helm charts deployed via the Terraform Helm provider.
-- **Cluster**: k3s with Traefik ingress and cert-manager for TLS. Already running.
+- **Cluster**: k3s with Tailscale funnels for ingress and TLS. No cert-manager. No Traefik.
 - **CI**: Woodpecker CI (deployed by this repo). No GitHub Actions — all CI is self-hosted.
 - **State**: Local terraform state for now. Remote backend is a post-bootstrap concern.
+- **Relationship**: This repo (bootstrap) provides the platform. [pal-e-services](https://github.com/ldraney/pal-e-services) consumes it for service onboarding, app deployments, and workload management.
 
 ## Agent Dispatch
 
