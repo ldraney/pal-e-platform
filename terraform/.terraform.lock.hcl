@@ -38,7 +38,7 @@ provider "registry.opentofu.org/hashicorp/kubernetes" {
 
 provider "registry.opentofu.org/tailscale/tailscale" {
   version     = "0.28.0"
-  constraints = "~> 0.17"
+  constraints = "~> 0.28"
   hashes = [
     "h1:ePEPKHOdFsiRunCD9IWTkFZlRBr2pKzohrNUgbCVY2Q=",
     "zh:26dc44b865b055069fbada06d8fcf0d44c32a365823219db1c122458c377a2f0",

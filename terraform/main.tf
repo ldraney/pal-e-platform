@@ -271,5 +271,5 @@ resource "kubernetes_ingress_v1" "grafana_funnel" {
     }
   }
 
-  depends_on = [helm_release.kube_prometheus_stack, helm_release.tailscale_operator]
+  depends_on = [helm_release.kube_prometheus_stack, helm_release.tailscale_operator, tailscale_acl.this]
 }
