@@ -479,3 +479,176 @@ resource "kubernetes_ingress_v1" "woodpecker_funnel" {
 
   depends_on = [helm_release.woodpecker, helm_release.tailscale_operator, tailscale_acl.this]
 }
+
+# --- Harbor Registry Namespace ---
+
+resource "kubernetes_namespace_v1" "harbor" {
+  metadata {
+    name = "harbor"
+    labels = {
+      name = "harbor"
+    }
+  }
+}
+
+# --- Harbor Container Registry ---
+
+resource "helm_release" "harbor" {
+  name       = "harbor"
+  namespace  = kubernetes_namespace_v1.harbor.metadata[0].name
+  repository = "https://helm.goharbor.io"
+  chart      = "harbor"
+  version    = "1.18.2"
+  timeout    = 600
+
+  values = [yamlencode({
+    expose = {
+      type = "clusterIP"
+      clusterIP = {
+        name = "harbor"
+        ports = {
+          httpPort = 80
+        }
+      }
+      tls = {
+        enabled = false
+      }
+    }
+
+    externalURL = "https://harbor.${var.tailscale_domain}"
+
+    trivy = {
+      enabled = false
+    }
+
+    metrics = {
+      enabled = true
+      serviceMonitor = {
+        enabled = true
+      }
+    }
+
+    persistence = {
+      enabled = true
+      persistentVolumeClaim = {
+        registry = {
+          storageClass = "local-path"
+          size         = "20Gi"
+        }
+        jobservice = {
+          jobLog = {
+            storageClass = "local-path"
+            size         = "1Gi"
+          }
+        }
+        database = {
+          storageClass = "local-path"
+          size         = "2Gi"
+        }
+        redis = {
+          storageClass = "local-path"
+          size         = "1Gi"
+        }
+      }
+    }
+
+    database = {
+      type = "internal"
+      internal = {
+        resources = {
+          requests = { cpu = "50m", memory = "128Mi" }
+          limits   = { memory = "512Mi" }
+        }
+      }
+    }
+    redis = {
+      type = "internal"
+      internal = {
+        resources = {
+          requests = { cpu = "20m", memory = "32Mi" }
+          limits   = { memory = "128Mi" }
+        }
+      }
+    }
+
+    core = {
+      resources = {
+        requests = { cpu = "100m", memory = "256Mi" }
+        limits   = { memory = "512Mi" }
+      }
+    }
+
+    portal = {
+      resources = {
+        requests = { cpu = "20m", memory = "32Mi" }
+        limits   = { memory = "128Mi" }
+      }
+    }
+
+    registry = {
+      resources = {
+        requests = { cpu = "100m", memory = "128Mi" }
+        limits   = { memory = "256Mi" }
+      }
+    }
+
+    jobservice = {
+      resources = {
+        requests = { cpu = "50m", memory = "64Mi" }
+        limits   = { memory = "256Mi" }
+      }
+    }
+
+    nginx = {
+      resources = {
+        requests = { cpu = "20m", memory = "32Mi" }
+        limits   = { memory = "128Mi" }
+      }
+    }
+  })]
+
+  set_sensitive {
+    name  = "harborAdminPassword"
+    value = var.harbor_admin_password
+    type  = "string"
+  }
+
+  set_sensitive {
+    name  = "secretKey"
+    value = var.harbor_secret_key
+    type  = "string"
+  }
+
+  depends_on = [helm_release.kube_prometheus_stack]
+}
+
+# --- Harbor Tailscale Funnel ---
+
+resource "kubernetes_ingress_v1" "harbor_funnel" {
+  metadata {
+    name      = "harbor-funnel"
+    namespace = kubernetes_namespace_v1.harbor.metadata[0].name
+    annotations = {
+      "tailscale.com/funnel" = "true"
+    }
+  }
+
+  spec {
+    ingress_class_name = "tailscale"
+
+    default_backend {
+      service {
+        name = "harbor"
+        port {
+          number = 80
+        }
+      }
+    }
+
+    tls {
+      hosts = ["harbor"]
+    }
+  }
+
+  depends_on = [helm_release.harbor, helm_release.tailscale_operator, tailscale_acl.this]
+}

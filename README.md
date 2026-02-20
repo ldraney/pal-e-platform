@@ -2,7 +2,7 @@
 
 Bootstrap repo that deploys the minimum viable self-hosting stack onto an existing k3s cluster. Once Forgejo is running with observability, all future infrastructure work moves to self-hosted repos. GitHub is the disaster recovery entry point.
 
-**Definition of done:** `tofu apply` produces a working Forgejo instance with CI and observability.
+**Definition of done:** `tofu apply` produces a working Forgejo instance with CI, container registry, and observability.
 
 ## Bootstrap Dependency Chain
 
@@ -10,8 +10,9 @@ Bootstrap repo that deploys the minimum viable self-hosting stack onto an existi
 k3s (exists)
   → Tailscale operator (networking/ingress via funnels)
     → Prometheus + Grafana + Loki (observability)
-      → Forgejo (git hosting + container registry)
+      → Forgejo (git hosting)
         → Woodpecker CI (build pipelines)
+      → Harbor (container registry)
 ```
 
 ## Roadmap
@@ -27,8 +28,9 @@ Track progress in [#8 (Bootstrap platform epic)](https://github.com/ldraney/pal-
 | Ingress + TLS | Tailscale funnels | Zero-config ingress and TLS via tailnet |
 | Metrics | Prometheus + Grafana | Collection and dashboards |
 | Logs | Loki | Lightweight log aggregation |
-| Git hosting | Forgejo | Self-hosted git + built-in OCI registry |
+| Git hosting | Forgejo | Self-hosted git hosting and code review |
 | CI | Woodpecker CI | Container-native CI, Forgejo-integrated |
+| Registry | Harbor | CNCF container registry with vulnerability scanning |
 
 ## What Moves to Forgejo
 
