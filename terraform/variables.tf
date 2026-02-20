@@ -61,3 +61,15 @@ variable "woodpecker_admin_users" {
   type        = string
   default     = "forgejo_admin"
 }
+
+variable "harbor_admin_password" {
+  description = "Harbor admin password"
+  type        = string
+  sensitive   = true
+}
+
+variable "harbor_secret_key" {
+  description = "Harbor 16-char encryption key for internal secrets (must be preserved)"
+  type        = string
+  sensitive   = true
+}

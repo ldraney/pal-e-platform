@@ -27,3 +27,8 @@ output "woodpecker_url" {
   description = "Woodpecker CI URL (Tailscale funnel)"
   value       = "https://woodpecker.${var.tailscale_domain}"
 }
+
+output "harbor_url" {
+  description = "Harbor container registry URL (Tailscale funnel)"
+  value       = "https://harbor.${var.tailscale_domain}"
+}
