@@ -14,3 +14,15 @@ variable "tailscale_oauth_client_secret" {
   type        = string
   sensitive   = true
 }
+
+variable "grafana_admin_password" {
+  description = "Grafana admin password"
+  type        = string
+  sensitive   = true
+}
+
+variable "tailscale_domain" {
+  description = "Tailscale tailnet domain for funnel URLs"
+  type        = string
+  default     = "tail5b443a.ts.net"
+}
