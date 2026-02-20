@@ -67,7 +67,9 @@ resource "tailscale_acl" "this" {
     }
   })
 
+  # Terraform is the source of truth — manual admin console edits will be overwritten
   overwrite_existing_content = true
+  reset_acl_on_destroy       = true
 }
 
 # --- Monitoring Namespace ---
