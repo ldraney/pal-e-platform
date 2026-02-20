@@ -143,6 +143,7 @@ resource "helm_release" "loki_stack" {
   repository = "https://grafana.github.io/helm-charts"
   chart      = "loki-stack"
   version    = "2.10.3"
+  timeout    = 600
 
   values = [yamlencode({
     grafana = { enabled = false }
