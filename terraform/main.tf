@@ -34,6 +34,42 @@ resource "helm_release" "tailscale_operator" {
   }
 }
 
+# --- Tailscale ACL Policy ---
+
+resource "tailscale_acl" "this" {
+  acl = jsonencode({
+    grants = [
+      {
+        src = ["*"]
+        dst = ["*"]
+        ip  = ["*"]
+      }
+    ]
+
+    ssh = [
+      {
+        action = "check"
+        src    = ["autogroup:member"]
+        dst    = ["autogroup:self"]
+        users  = ["autogroup:nonroot", "root"]
+      }
+    ]
+
+    nodeAttrs = [
+      {
+        target = ["autogroup:member", "tag:k8s"]
+        attr   = ["funnel"]
+      }
+    ]
+
+    tagOwners = {
+      "tag:k8s" = ["autogroup:admin"]
+    }
+  })
+
+  overwrite_existing_content = true
+}
+
 # --- Monitoring Namespace ---
 
 resource "kubernetes_namespace_v1" "monitoring" {
