@@ -28,7 +28,7 @@ Track progress in [#8 (Bootstrap platform epic)](https://github.com/ldraney/pal-
 | Ingress + TLS | Tailscale funnels | Zero-config ingress and TLS via tailnet |
 | Metrics | Prometheus + Grafana | Collection and dashboards |
 | Logs | Loki | Lightweight log aggregation |
-| Git hosting | Forgejo | Self-hosted git + built-in OCI registry |
+| Git hosting | Forgejo | Self-hosted git hosting and code review |
 | CI | Woodpecker CI | Container-native CI, Forgejo-integrated |
 | Registry | Harbor | CNCF container registry with vulnerability scanning |
 
