@@ -307,6 +307,9 @@ resource "helm_release" "forgejo" {
           ROOT_URL   = "https://forgejo.${var.tailscale_domain}/"
           SSH_DOMAIN = "forgejo.${var.tailscale_domain}"
         }
+        webhook = {
+          ALLOWED_HOST_LIST = "external,loopback"
+        }
       }
     }
 
@@ -365,4 +368,114 @@ resource "kubernetes_ingress_v1" "forgejo_funnel" {
   }
 
   depends_on = [helm_release.forgejo, helm_release.tailscale_operator, tailscale_acl.this]
+}
+
+# --- Woodpecker CI Namespace ---
+
+resource "kubernetes_namespace_v1" "woodpecker" {
+  metadata {
+    name = "woodpecker"
+    labels = {
+      name = "woodpecker"
+    }
+  }
+}
+
+# --- Woodpecker CI ---
+
+resource "helm_release" "woodpecker" {
+  name      = "woodpecker"
+  namespace = kubernetes_namespace_v1.woodpecker.metadata[0].name
+  chart     = "oci://ghcr.io/woodpecker-ci/helm/woodpecker"
+  version   = "3.5.1"
+  timeout   = 600
+
+  values = [yamlencode({
+    server = {
+      env = {
+        WOODPECKER_HOST                = "https://woodpecker.${var.tailscale_domain}"
+        WOODPECKER_ADMIN               = var.woodpecker_admin_users
+        WOODPECKER_FORGEJO             = "true"
+        WOODPECKER_FORGEJO_URL         = "https://forgejo.${var.tailscale_domain}"
+        WOODPECKER_FORGEJO_SKIP_VERIFY = "false"
+      }
+
+      statefulSet = {
+        replicaCount = 1
+      }
+
+      persistentVolume = {
+        enabled      = true
+        size         = "5Gi"
+        storageClass = "local-path"
+      }
+
+      resources = {
+        requests = { cpu = "50m", memory = "128Mi" }
+        limits   = { memory = "512Mi" }
+      }
+    }
+
+    agent = {
+      enabled      = true
+      replicaCount = 1
+
+      env = {
+        WOODPECKER_BACKEND                   = "kubernetes"
+        WOODPECKER_BACKEND_K8S_NAMESPACE     = "woodpecker"
+        WOODPECKER_BACKEND_K8S_STORAGE_CLASS = "local-path"
+        WOODPECKER_BACKEND_K8S_VOLUME_SIZE   = "1Gi"
+      }
+
+      resources = {
+        requests = { cpu = "50m", memory = "64Mi" }
+        limits   = { memory = "256Mi" }
+      }
+    }
+  })]
+
+  set_sensitive {
+    name  = "server.env.WOODPECKER_FORGEJO_CLIENT"
+    value = var.woodpecker_forgejo_client
+    type  = "string"
+  }
+
+  set_sensitive {
+    name  = "server.env.WOODPECKER_FORGEJO_SECRET"
+    value = var.woodpecker_forgejo_secret
+    type  = "string"
+  }
+
+  depends_on = [helm_release.forgejo]
+}
+
+# --- Woodpecker CI Tailscale Funnel ---
+
+resource "kubernetes_ingress_v1" "woodpecker_funnel" {
+  metadata {
+    name      = "woodpecker-funnel"
+    namespace = kubernetes_namespace_v1.woodpecker.metadata[0].name
+    annotations = {
+      "tailscale.com/funnel" = "true"
+    }
+  }
+
+  spec {
+    ingress_class_name = "tailscale"
+
+    default_backend {
+      service {
+        name = "woodpecker-server"
+        port {
+          number = 80
+        }
+      }
+    }
+
+    tls {
+      hosts = ["woodpecker"]
+    }
+  }
+
+  depends_on = [helm_release.woodpecker, helm_release.tailscale_operator, tailscale_acl.this]
 }

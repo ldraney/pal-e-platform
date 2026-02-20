@@ -44,3 +44,20 @@ variable "forgejo_admin_email" {
   type        = string
   default     = "admin@forgejo.local"
 }
+
+variable "woodpecker_forgejo_client" {
+  description = "Forgejo OAuth client ID for Woodpecker CI"
+  type        = string
+}
+
+variable "woodpecker_forgejo_secret" {
+  description = "Forgejo OAuth client secret for Woodpecker CI"
+  type        = string
+  sensitive   = true
+}
+
+variable "woodpecker_admin_users" {
+  description = "Comma-separated Forgejo usernames with Woodpecker admin rights"
+  type        = string
+  default     = "forgejo_admin"
+}
