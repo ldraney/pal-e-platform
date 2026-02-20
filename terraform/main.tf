@@ -552,8 +552,24 @@ resource "helm_release" "harbor" {
       }
     }
 
-    database = { type = "internal" }
-    redis    = { type = "internal" }
+    database = {
+      type = "internal"
+      internal = {
+        resources = {
+          requests = { cpu = "50m", memory = "128Mi" }
+          limits   = { memory = "512Mi" }
+        }
+      }
+    }
+    redis = {
+      type = "internal"
+      internal = {
+        resources = {
+          requests = { cpu = "20m", memory = "32Mi" }
+          limits   = { memory = "128Mi" }
+        }
+      }
+    }
 
     core = {
       resources = {
