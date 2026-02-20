@@ -34,6 +34,45 @@ resource "helm_release" "tailscale_operator" {
   }
 }
 
+# --- Tailscale ACL Policy ---
+
+resource "tailscale_acl" "this" {
+  acl = jsonencode({
+    grants = [
+      {
+        src = ["*"]
+        dst = ["*"]
+        ip  = ["*"]
+      }
+    ]
+
+    ssh = [
+      {
+        action = "check"
+        src    = ["autogroup:member"]
+        dst    = ["autogroup:self"]
+        users  = ["autogroup:nonroot", "root"]
+      }
+    ]
+
+    nodeAttrs = [
+      {
+        target = ["autogroup:member", "tag:k8s"]
+        attr   = ["funnel"]
+      }
+    ]
+
+    tagOwners = {
+      "tag:k8s" = ["autogroup:admin"]
+    }
+  })
+
+  # Terraform is the source of truth — manual admin console edits will be overwritten
+  overwrite_existing_content = true
+  # WARNING: resets the ENTIRE tailnet ACL to defaults on destroy (safe while this is the sole ACL manager)
+  reset_acl_on_destroy = true
+}
+
 # --- Monitoring Namespace ---
 
 resource "kubernetes_namespace_v1" "monitoring" {
@@ -232,5 +271,5 @@ resource "kubernetes_ingress_v1" "grafana_funnel" {
     }
   }
 
-  depends_on = [helm_release.kube_prometheus_stack, helm_release.tailscale_operator]
+  depends_on = [helm_release.kube_prometheus_stack, helm_release.tailscale_operator, tailscale_acl.this]
 }
